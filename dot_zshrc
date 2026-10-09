@@ -5,9 +5,11 @@ export PATH=/usr/local/bin:$PATH
 # export NVM_DIR="$HOME/.nvm"
 # . "$(brew --prefix nvm)/nvm.sh"
 # NVM Stuff
-export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
-nvm use default --silent
+if command -v nvm >/dev/null 2>&1; then
+  export NVM_DIR="$HOME/.nvm"
+  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
+  nvm use default --silent
+fi
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -131,7 +133,9 @@ export PATH="/Users/nathangross/.codeium/windsurf/bin:$PATH"
 export PATH="/Users/nathangross/.codeium/windsurf/bin:$PATH"
 export PATH="/opt/homebrew/opt/ruby@3.2/bin:$PATH"
 
-. "$HOME/.local/bin/env"
+if [[ -f "$HOME/.local/bin/env" ]]; then
+    source "$HOME/.local/bin/env"
+fi
 
 # opencode
 export PATH=/Users/nathangross/.opencode/bin:$PATH
