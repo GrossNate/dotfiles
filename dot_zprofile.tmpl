@@ -1,0 +1,21 @@
+# Login shell environment.
+
+{{ if eq .chezmoi.os "darwin" -}}
+# Initialize Homebrew on Apple Silicon.
+if [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
+# Optional framework-installed Python.
+PYTHON_FRAMEWORK="/Library/Frameworks/Python.framework/Versions/3.11/bin"
+if [[ -d "$PYTHON_FRAMEWORK" ]]; then
+    path=("$PYTHON_FRAMEWORK" $path)
+fi
+{{ end -}}
+
+# Prefer user-installed executables.
+[[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
+
+# Remove duplicate PATH entries.
+typeset -U path
+
