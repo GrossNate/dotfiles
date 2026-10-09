@@ -1,0 +1,4 @@
+# Make user-installed executables available in all Zsh shells.
+typeset -U path
+[[ -d "$HOME/.local/bin" ]] && path=("$HOME/.local/bin" $path)
+
