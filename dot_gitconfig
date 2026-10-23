@@ -7,7 +7,7 @@
 	defaultBranch = main
 [user]
 	name = Nathan Gross
-	email = nathan.gross@gmail.com
+	email = 117976176+GrossNate@users.noreply.github.com
 	signkey = 241C83A49D2C2A60
 [gpg]
 	program = gpg not found
