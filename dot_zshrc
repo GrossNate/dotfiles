@@ -13,6 +13,11 @@ plugins=(git docker 1password battery)
 
 source "$ZSH/oh-my-zsh.sh"
 
+# Smart directory navigation.
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+fi
+
 # Powerlevel10k configuration.
 [[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 
