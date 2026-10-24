@@ -6,6 +6,15 @@ return {
 	{
 		"saghen/blink.cmp",
 		opts = {
+			sources = {
+				providers = {
+					snippets = {
+						-- Disables annoying suggestions. If I want to add back in custom
+						-- snippets then need to re-enable this and do some fine tuning.
+						enabled = false,
+					},
+				},
+			},
 			completion = {
 				menu = {
 					auto_show = function()
