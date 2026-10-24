@@ -55,3 +55,54 @@ claude-issue() {
     claude "We're working GitHub issue #$1, already on its linked branch. Run \`gh issue view $1 --comments\` for context. Work on THIS branch — do not create a new one — and put 'Closes #$1' in the eventual PR."
 }
 
+# Copy command output or a specified amount of tmux scrollback.
+cplast() {
+    if [[ -z "$TMUX" ]]; then
+        print -u2 "cplast: not inside tmux"
+        return 1
+    fi
+
+    if [[ "$OSTYPE" != darwin* ]]; then
+        print -u2 "cplast: clipboard support not configured on this system"
+        return 1
+    fi
+
+    if (( $# == 0 )); then
+        # Copy the previous command's output using semantic shell markers.
+        tmux capture-pane -p -F -J -S - | awk '
+            {
+                separator = index($0, " ")
+                if (!separator) next
+
+                flags = substr($0, 1, separator - 1)
+                line = substr($0, separator + 1)
+
+                if (flags ~ /P/) {
+                    last_output = output
+                    output = ""
+                    in_command = 0
+                    next
+                }
+
+                if (flags ~ /O/)
+                    in_command = 1
+
+                if (in_command)
+                    output = output line "\n"
+            }
+            END {
+                printf "%s", last_output
+            }
+        ' | pbcopy
+    else
+        # Copy a specified number of scrollback lines plus the visible pane.
+        local lines="$1"
+
+        if [[ ! "$lines" =~ ^[0-9]+$ ]]; then
+            print -u2 "cplast: line count must be a nonnegative integer"
+            return 1
+        fi
+
+        tmux capture-pane -p -J -S "-$lines" | pbcopy
+    fi
+}

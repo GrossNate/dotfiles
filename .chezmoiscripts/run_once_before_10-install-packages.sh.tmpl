@@ -5,39 +5,41 @@ set -euo pipefail
 # macOS — install packages using Homebrew.
 
 if ! command -v brew >/dev/null 2>&1; then
-    echo "Homebrew is required. Install it from https://brew.sh"
-    exit 1
+  echo "Homebrew is required. Install it from https://brew.sh"
+  exit 1
 fi
 
 brew install \
-    git \
-    zsh \
-    neovim \
-    ripgrep \
-    lazygit
+  git \
+  zsh \
+  neovim \
+  ripgrep \
+  lazygit \
+  zoxide
 
 {{ else if eq .chezmoi.os "linux" }}
 # Ubuntu — install basic development packages.
 
 if ! command -v apt-get >/dev/null 2>&1; then
-    echo "This script only supports Ubuntu/Debian."
-    exit 1
+  echo "This script only supports Ubuntu/Debian."
+  exit 1
 fi
 
 sudo apt-get update
 
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    curl \
-    git \
-    zsh \
-    ripgrep \
-    build-essential \
+  curl \
+  git \
+  zsh \
+  ripgrep \
+  build-essential \
+  zoxide
 
 # Ubuntu packages the fd executable as fdfind.
 mkdir -p "$HOME/.local/bin"
 
 if command -v fdfind >/dev/null 2>&1; then
-    ln -sfn "$(command -v fdfind)" "$HOME/.local/bin/fd"
+  ln -sfn "$(command -v fdfind)" "$HOME/.local/bin/fd"
 fi
 
 # Install a modern Neovim release without relying on
@@ -47,34 +49,33 @@ fi
 NVIM_VERSION="v0.11.7"
 
 case "$(uname -m)" in
-    x86_64) NVIM_ARCH="x86_64" ;;
-    aarch64|arm64) NVIM_ARCH="arm64" ;;
-    *)
-        echo "Unsupported Neovim architecture: $(uname -m)"
-        exit 1
-        ;;
+x86_64) NVIM_ARCH="x86_64" ;;
+aarch64 | arm64) NVIM_ARCH="arm64" ;;
+*)
+  echo "Unsupported Neovim architecture: $(uname -m)"
+  exit 1
+  ;;
 esac
 
 NVIM_NAME="nvim-linux-${NVIM_ARCH}"
 NVIM_DIR="$HOME/.local/opt/${NVIM_NAME}-${NVIM_VERSION}"
 
 if [ ! -x "$NVIM_DIR/bin/nvim" ]; then
-    echo "Installing Neovim ${NVIM_VERSION}"
+  echo "Installing Neovim ${NVIM_VERSION}"
 
-    TEMP_DIR="$(mktemp -d)"
-    trap 'rm -rf "$TEMP_DIR"' EXIT
+  TEMP_DIR="$(mktemp -d)"
+  trap 'rm -rf "$TEMP_DIR"' EXIT
 
-    curl -fL \
-        "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/${NVIM_NAME}.tar.gz" \
-        -o "$TEMP_DIR/nvim.tar.gz"
+  curl -fL \
+    "https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/${NVIM_NAME}.tar.gz" \
+    -o "$TEMP_DIR/nvim.tar.gz"
 
-    mkdir -p "$HOME/.local/opt"
-    tar -xzf "$TEMP_DIR/nvim.tar.gz" -C "$TEMP_DIR"
+  mkdir -p "$HOME/.local/opt"
+  tar -xzf "$TEMP_DIR/nvim.tar.gz" -C "$TEMP_DIR"
 
-    mv "$TEMP_DIR/$NVIM_NAME" "$NVIM_DIR"
+  mv "$TEMP_DIR/$NVIM_NAME" "$NVIM_DIR"
 fi
 
 ln -sfn "$NVIM_DIR/bin/nvim" "$HOME/.local/bin/nvim"
 
 {{ end }}
-
