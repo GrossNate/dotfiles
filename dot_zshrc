@@ -111,3 +111,5 @@ cplast() {
         tmux capture-pane -p -J -S "-$lines" | pbcopy
     fi
 }
+
+export EDITOR=nvim
