@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOTENVX_VERSION="2.38.2"
+dotenvx_install_dir="$HOME/.local/bin"
+dotenvx_binary="$dotenvx_install_dir/dotenvx"
+
+case "$(uname -s)" in
+Darwin)
+  dotenvx_os="darwin"
+  dotenvx_checksum_command=(shasum -a 256)
+  ;;
+Linux)
+  dotenvx_os="linux"
+  dotenvx_checksum_command=(sha256sum)
+  ;;
+*)
+  echo "Unsupported operating system: $(uname -s)" >&2
+  exit 1
+  ;;
+esac
+
+case "$(uname -m)" in
+x86_64) dotenvx_arch="amd64" ;;
+arm64 | aarch64) dotenvx_arch="arm64" ;;
+*)
+  echo "Unsupported architecture: $(uname -m)" >&2
+  exit 1
+  ;;
+esac
+
+# SHA-256 checksums from the pinned release.
+case "$dotenvx_os-$dotenvx_arch" in
+darwin-amd64)
+  dotenvx_sha256="755a9d9e3fb9e9545a08c40d45e9eb45e114d0449a988fca3d13841018a914f2"
+  ;;
+darwin-arm64)
+  dotenvx_sha256="ea9e44fb45aa1726a9ef4be13a553070f634a7487f850e0d88bc5bca10332f86"
+  ;;
+linux-amd64)
+  dotenvx_sha256="37d8e26600b707e4ec450b1ab57571159f6ac39be736b04886a0fcc66527a1bb"
+  ;;
+linux-arm64)
+  dotenvx_sha256="cb0bb6e4cf3ff5ae7be8489d91ee14d1db302be20c531bfc4e18e5ff9207be3b"
+  ;;
+esac
+
+if [ -x "$dotenvx_binary" ] &&
+  [ "$("$dotenvx_binary" --version)" = "$DOTENVX_VERSION" ]; then
+  exit 0
+fi
+
+dotenvx_tmpdir="$(mktemp -d)"
+trap 'rm -rf "$dotenvx_tmpdir"' EXIT
+
+dotenvx_archive="dotenvx-${DOTENVX_VERSION}-${dotenvx_os}-${dotenvx_arch}.tar.gz"
+
+curl -fsSL \
+  "https://github.com/dotenvx/dotenvx/releases/download/v${DOTENVX_VERSION}/${dotenvx_archive}" \
+  -o "$dotenvx_tmpdir/dotenvx.tar.gz"
+
+printf '%s  %s\n' \
+  "$dotenvx_sha256" "$dotenvx_tmpdir/dotenvx.tar.gz" |
+  "${dotenvx_checksum_command[@]}" --check -
+
+tar -xzf "$dotenvx_tmpdir/dotenvx.tar.gz" -C "$dotenvx_tmpdir"
+
+mkdir -p "$dotenvx_install_dir"
+install -m 755 "$dotenvx_tmpdir/dotenvx" "$dotenvx_binary"
+
+"$dotenvx_binary" --version
